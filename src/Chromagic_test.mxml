@@ -36,7 +36,7 @@
 				trace("rgb:"+desto[0].toString(16)+"-"+desto[1].toString(16)+"-"+desto[2].toString(16)+"-"+desto[3].toString(16));
 				hueSlider.value=col[0]*360;
 				chroma.m_hue=hueSlider.value
-				satSlider.value=col[1]*360;
+				satSlider.value=col[1];
 				
 			}
 			
@@ -72,6 +72,12 @@
 				
 			}
 			
+			protected function hslider1_clickHandler(event:MouseEvent):void
+			{
+				chroma.m_smoothing=smoothSlider.value;
+				
+			}
+			
 		]]>
 	</fx:Script>
 	<s:VGroup>
@@ -98,6 +104,11 @@
 			<s:HSlider id="satSlider" click="satSlider_clickHandler(event)" width="300" minimum="0" maximum="1" value="0.2" stepSize="0.01" />
 			<s:Label text="saturation" />
 		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider width="300" id="smoothSlider" minimum="0" maximum="1" click="hslider1_clickHandler(event)" value="0.2" stepSize="0.01" />
+			<s:Label text="Smoothing" />
+		</s:HGroup>
+
 		<s:HGroup>
 			<s:HSlider width="300" minimum="0" maximum="360" value="320" />
 			<s:Label text="lorem ipsum" />

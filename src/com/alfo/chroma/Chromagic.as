@@ -23,7 +23,7 @@ package com.alfo.chroma
 			m_delta_hue = 30.0;
 			m_min_saturation = 0.2;
 			m_left_spill = m_right_spill = 2.0;
-			m_smoothing = 0.0;
+			m_smoothing = 0;
 			
 			m_min_value = 0.35;
 			m_max_value = 0.95;
@@ -251,6 +251,7 @@ package com.alfo.chroma
 					keyedBmp.setPixel32(x,y,currentPixel);
 
 				}
+				
 				//trace("new line"+y);
 			}
 			

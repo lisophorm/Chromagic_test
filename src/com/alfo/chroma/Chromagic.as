@@ -4,7 +4,7 @@ package com.alfo.chroma
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
 	import flash.utils.getTimer;
-
+	
 	public class Chromagic
 	{
 		public var  m_hue:Number;
@@ -20,6 +20,8 @@ package com.alfo.chroma
 		
 		private var dataBytes:Vector.<uint>;
 		private var destDataBytes:ByteArray;
+		
+		private var picPos:uint = 0;
 		
 		public function Chromagic()
 		{
@@ -185,10 +187,14 @@ package com.alfo.chroma
 		}
 		
 		
-		public function key(m_video_input:BitmapData):BitmapData
+		
+		
+		public function key(m_video_input:BitmapData,useSpill:Boolean=false):BitmapData
 		{
 			var bits:String;
 			var currentPixel:uint;
+			var imgHeight:uint=m_video_input.height;
+			var imgWidth:uint=m_video_input.width;
 			var keyedBmp:BitmapData=new BitmapData(m_video_input.width,m_video_input.height,true,0xAABBCCDD);
 			destDataBytes=new ByteArray();
 			//dataBytes=m_video_input.getPixels(new Rectangle(0,0,m_video_input.width,m_video_input.height));
@@ -216,86 +222,96 @@ package com.alfo.chroma
 			h2 += 0.1 * smoothing;
 			trace("key start");
 			var startTime:uint = getTimer();
-			for(var picPos:uint = 0; picPos <dataBytes.length; picPos++)
+			for(picPos = 0; picPos <dataBytes.length; picPos++)
 			{
-				//bits = m_video_input.scanLine(y);
 				
-
-					//currentPixel=
-					//currentPixel=m_video_input.getPixel32(x,y);
-					//rgb[3]=dataBytes.readUnsignedByte() /255.0;
-					//rgb[0]=dataBytes.readUnsignedByte() /255.0;
-					//rgb[1]=dataBytes.readUnsignedByte() /255.0;
-					//rgb[2]=dataBytes.readUnsignedByte() /255.0;
-					//rgb[2] = (currentPixel & 0xFF) / 255.0;
-					//rgb[1] = (currentPixel  >> 8 & 0xFF) / 255.0;
-					//rgb[0] = (currentPixel >> 16 & 0xFF) / 255.0;
-					//rgb[3] = (currentPixel >> 24 & 0xFF) / 255.0;
-					
-					rgb[2] = (dataBytes[picPos] & 0xFF) / 255.0;
-					rgb[1] = (dataBytes[picPos] >> 8 & 0xFF) / 255.0;
-					rgb[0] = (dataBytes[picPos] >> 16 & 0xFF) / 255.0;
-					rgb[3] = (dataBytes[picPos] >> 24 & 0xFF) / 255.0;
-					
-					hsv=RGB_to_HSV(rgb);
-					
-					if(hsv[0] > h1 && hsv[0] < h2)
+				rgb[2] = (dataBytes[picPos] & 0xFF) / 255.0;
+				rgb[1] = (dataBytes[picPos] >> 8 & 0xFF) / 255.0;
+				rgb[0] = (dataBytes[picPos] >> 16 & 0xFF) / 255.0;
+				rgb[3] = (dataBytes[picPos] >> 24 & 0xFF) / 255.0;
+				
+				hsv=RGB_to_HSV(rgb);
+				
+				if(hsv[0] > h1 && hsv[0] < h2)
+				{
+					if(hsv[1] > s && hsv[2] > 0.4 && hsv[2] < 0.95) 
 					{
-						if(hsv[1] > s && hsv[2] > 0.4 && hsv[2] < 0.95) 
-						{
-							hsv[3] = 0.0;
-							hsv[1] = 0.0;
-							
-							rgb=HSV_to_RGB(hsv);
-						} else if(hsv[1] > s && hsv[2] > 0.2) {
-							hsv[3] = (1 - hsv[1]) / 0.9;
-							
-							hsv[1] = 0.0;
-							rgb=HSV_to_RGB(hsv);
-						}
-						else
-						{
-							hsv[3] = 1.0;
-							hsv[1] = 0.0;
-							rgb=HSV_to_RGB(hsv);
-						}
+						hsv[3] = 0.0;
+						hsv[1] = 0.0;
+						
+						rgb=HSV_to_RGB(hsv);
+					} else if(hsv[1] > s && hsv[2] > 0.2) {
+						hsv[3] = (1 - hsv[1]) / 0.9;
+						
+						hsv[1] = 0.0;
+						rgb=HSV_to_RGB(hsv);
 					}
-					dataBytes[picPos] = (rgb[3] * 255.0) << 24 | (rgb[0] * 255.0) << 16 | (rgb[1] * 255.0) << 8 | (rgb[2] * 255.0);
-					//keyedBmp.setPixel32(x,y,currentPixel);
-					//destDataBytes.writeByte(int(rgb[3] * 255.0) << 24);
-					//destDataBytes.writeByte(int(rgb[0] * 255.0) << 16);
-					//destDataBytes.writeByte(int(rgb[1] * 255.0) << 8);
-					//destDataBytes.writeByte(int(rgb[2] * 255.0));
+					else
+					{
+						hsv[3] = 1.0;
+						hsv[1] = 0.0;
+						rgb=HSV_to_RGB(hsv);
+					}
+				}
+				dataBytes[picPos] = (rgb[3] * 255.0) << 24 | (rgb[0] * 255.0) << 16 | (rgb[1] * 255.0) << 8 | (rgb[2] * 255.0);
 
+				
 			}
 			//try {
-				//destDataBytes.position=0;
-				//keyedBmp.setPixels(new Rectangle(0,0,m_video_input.width,m_video_input.height),destDataBytes);
+			//destDataBytes.position=0;
+			//keyedBmp.setPixels(new Rectangle(0,0,m_video_input.width,m_video_input.height),destDataBytes);
 			//} catch (e:Error) {
 			//	trace("error in setpixels");
 			//}
-			keyedBmp.setVector(new Rectangle(0,0,m_video_input.width,m_video_input.height),dataBytes);
+			
 			var endTime:uint = getTimer();
-			
 			trace("key done in : " + (endTime-startTime)/1000);
-
-			/*var left_spill:Number = m_left_spill;
-			int right_spill = m_right_spill;
-			
-			for(int y = 1; y < m_video_input.height() - 1; y++)
-			{
-				bits = m_video_input.scanLine(y);
+			if(useSpill) {
+				startTime=getTimer();
+				var left_spill:Number = m_left_spill;
+				var right_spill:Number = m_right_spill;
 				
-				for(int x = 0; x < m_video_input.width() - right_spill; x++)
+				picPos = 0;
+				var offset:uint;
+				var offsetR:uint;
+				var offsetL:uint;
+				for(var y:uint = 1; y < imgHeight - 1; y++)
 				{
-					*(bits + x * 4 + 3) = min(*(bits + x * 4 + 3), *(bits + (x + right_spill) * 4 + 3));
+					//bits = m_video_input.scanLine(y);
+					picPos+=imgWidth;
+					
+					for( var x:uint= 0; x < imgWidth - right_spill; x++)
+					{
+						offset=x+picPos;
+						offsetR=x+picPos+right_spill;
+						try {
+							var rightAlpha:uint = Math.min(dataBytes[offset], dataBytes[offsetR]);
+							dataBytes[offset]=(dataBytes[offset] & 0x00FFFFFFFF) | (rightAlpha & 0xFF000000);
+						} catch(e:Error) {
+							trace("error in right spill:"+e.message);
+							break;
+						}
+					}
+					var destX:uint=(imgWidth - (left_spill as uint) - 1);
+					trace("start left spill loop at:"+destX);
+					for(x = destX; x >= 0; x--)
+					{
+						offset=+picPos;
+						offsetL=x+picPos - left_spill;
+						try {
+							var leftAlpha:uint = Math.min(dataBytes[x+picPos], dataBytes[offsetL]);
+							dataBytes[offset]=(dataBytes[offset] & 0x00FFFFFFFF) | (leftAlpha & 0xFF000000);
+						} catch(e:Error) {
+							trace("error in left spill x:"+x+"picPos:"+picPos+" offstL:"+offsetL+" error:"+e.message);
+							break;
+						}
+					}
 				}
 				
-				for(int x = m_video_input.width() - left_spill - 1; x >= 0; x--)
-				{
-					*(bits + x * 4 + 3) = min(*(bits + x * 4 + 3), *(bits + (x - left_spill) * 4 + 3));
-				}
-			}*/
+				endTime = getTimer();
+				trace("spill done in : " + (endTime-startTime)/1000);
+			}
+			keyedBmp.setVector(new Rectangle(0,0,m_video_input.width,m_video_input.height),dataBytes);
 			return keyedBmp;
 		}
 		
@@ -315,8 +331,8 @@ package com.alfo.chroma
 			return theValue;
 		}
 		
-
-
+		
+		
 		function extractRed(c:uint):uint {
 			return (( c >> 16 ) & 0xFF);
 		}

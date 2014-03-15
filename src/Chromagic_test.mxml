@@ -66,6 +66,12 @@
 				
 			}
 			
+			protected function satSlider_clickHandler(event:MouseEvent):void
+			{
+				chroma.m_min_saturation=satSlider.value;
+				
+			}
+			
 		]]>
 	</fx:Script>
 	<s:VGroup>
@@ -89,7 +95,7 @@
 			<s:Label text="delta" />
 		</s:HGroup>
 		<s:HGroup>
-			<s:HSlider id="satSlider" width="300" minimum="0" maximum="1" value="0.2" stepSize="0.01" />
+			<s:HSlider id="satSlider" click="satSlider_clickHandler(event)" width="300" minimum="0" maximum="1" value="0.2" stepSize="0.01" />
 			<s:Label text="saturation" />
 		</s:HGroup>
 		<s:HGroup>

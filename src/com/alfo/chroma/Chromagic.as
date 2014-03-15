@@ -1,6 +1,7 @@
 package com.alfo.chroma
 {
 	import flash.display.BitmapData;
+	import flash.utils.ByteArray;
 	import flash.utils.getTimer;
 
 	public class Chromagic
@@ -185,6 +186,8 @@ package com.alfo.chroma
 			var bits:String;
 			var currentPixel:uint;
 			var keyedBmp:BitmapData=new BitmapData(m_video_input.width,m_video_input.height,true,0xAABBCCDD);
+			var dataBytes:ByteArray;
+			
 			
 			var rgb : Vector.<Number> = new <Number>[0, 0, 0, 0];
 			var hsv : Vector.<Number> = new <Number>[0, 0, 0, 0];

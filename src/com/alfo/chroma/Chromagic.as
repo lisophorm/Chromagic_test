@@ -215,11 +215,11 @@ package com.alfo.chroma
 			h2 += 0.1 * smoothing;
 			trace("key start");
 			var startTime:uint = getTimer();
-			for(var y:int = 0; y < m_video_input.height; y++)
+			for(var y:uint = 0; y < m_video_input.height; y++)
 			{
 				//bits = m_video_input.scanLine(y);
 				
-				for(var x:int = 0; x < m_video_input.width; x++)
+				for(var x:uint = 0; x < m_video_input.width; x++)
 				{
 					//currentPixel=
 					//currentPixel=m_video_input.getPixel32(x,y);

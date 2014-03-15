@@ -14,6 +14,7 @@ tmp/
 *.bak
 *.swp
 *.png
+*.swf
 *~.nib
 local.properties
 .classpath

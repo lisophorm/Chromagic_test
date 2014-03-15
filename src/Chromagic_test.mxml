@@ -7,6 +7,8 @@
 		<![CDATA[
 			import com.alfo.chroma.Chromagic;
 			
+			import flash.utils.getTimer;
+			
 			import mx.events.FlexEvent;
 			
 			import spark.components.Image;
@@ -14,11 +16,18 @@
 			var chroma:Chromagic;
 			
 			var bits:ByteArray = new ByteArray();
+			var destBits:ByteArray;
 			
 			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 			{
+				var startTime:Number = getTimer();
 				chroma=new Chromagic();
-
+				var i:Number=5;
+				var result:Number=i>>8;
+				trace("bitwise << 8 ="+result);
+				var endTime:Number = (getTimer()-startTime)/1000;
+				renderTime.text=endTime.toFixed(2);
+				trace("key done in : " + (endTime-startTime)/1000);
 			}
 			
 			protected function image1_clickHandler(event:MouseEvent):void
@@ -60,8 +69,15 @@
 			
 			protected function button1_clickHandler(event:MouseEvent):void
 			{
+				var startTime:Number = getTimer();
+
+				
+				
 				var gino:BitmapData;
 				gino=chroma.key(imo.bitmapData);
+				trace("key done in : " + (endTime-startTime)/1000);
+				var endTime:Number = (getTimer()-startTime)/1000;
+				renderTime.text=endTime.toFixed(2);
 				dest.source=gino;
 				
 			}
@@ -91,7 +107,10 @@
 	</s:HGroup>
 		
 			
-			<s:Button label="Chromami" click="button1_clickHandler(event)" />
+			<s:HGroup>
+				<s:Button label="Chromami" click="button1_clickHandler(event)" />
+				<s:Label id="renderTime" width="200" text="gino" />
+			</s:HGroup>
 		<s:HGroup>
 			<s:HSlider id="hueSlider" click="hueSlider_clickHandler(event)" width="300" minimum="0" maximum="360" value="120" />
 			<s:Label text="hue" />

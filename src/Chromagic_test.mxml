@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   backgroundColor="0x0000cc" creationComplete="windowedapplication1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.alfo.chroma.Chromagic;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.components.Image;
+			
+			var chroma:Chromagic;
+			
+			var bits:ByteArray = new ByteArray();
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
+			{
+				chroma=new Chromagic();
+
+			}
+			
+			protected function image1_clickHandler(event:MouseEvent):void
+			{
+				
+				trace("click:");
+				var col:Vector.<Number>=chroma.RGB_to_HSV(chroma.argb2vec(imo.bitmapData.getPixel32(imo.mouseX,imo.mouseY)));
+				trace("originzal:"+imo.bitmapData.getPixel32(imo.mouseX,imo.mouseY).toString(16));
+				var pt:Point=new Point();
+				pt=imo.globalToLocal(pt);
+				trace("x:"+imo.mouseX);
+				trace("y:"+imo.mouseY);
+				trace("hsv:"+col[0].toString()+"-"+col[1].toString()+"-"+col[2].toString()+"-"+col[3].toString());
+				var desto:Vector.<Number>=chroma.HSV_to_RGB(col);
+				trace("rgb:"+desto[0].toString(16)+"-"+desto[1].toString(16)+"-"+desto[2].toString(16)+"-"+desto[3].toString(16));
+				hueSlider.value=col[0]*360;
+				chroma.m_hue=hueSlider.value
+				satSlider.value=col[1]*360;
+				
+			}
+			
+			protected function imo_completeHandler(event:Event):void
+			{
+				trace("image loaded");
+				
+			}
+			
+			protected function hueSlider_clickHandler(event:MouseEvent):void
+			{
+				chroma.m_hue=hueSlider.value;
+				
+			}
+			
+			protected function deltaSlider_clickHandler(event:MouseEvent):void
+			{
+				chroma.m_delta_hue=deltaSlider.value;
+				
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				var gino:BitmapData;
+				gino=chroma.key(imo.bitmapData);
+				dest.source=gino;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<s:VGroup>
+		
+	
+		
+	<s:HGroup>
+		<s:Spacer height="50" />
+		<s:Image complete="imo_completeHandler(event)" id="imo" click="image1_clickHandler(event)" source="pictures/green.png" />
+		<s:BitmapImage id="dest" width="{imo.width}" height="{imo.height}" />
+	</s:HGroup>
+		
+			
+			<s:Button label="Chromami" click="button1_clickHandler(event)" />
+		<s:HGroup>
+			<s:HSlider id="hueSlider" click="hueSlider_clickHandler(event)" width="300" minimum="0" maximum="360" value="120" />
+			<s:Label text="hue" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider id="deltaSlider" click="deltaSlider_clickHandler(event)" width="300" minimum="0" maximum="360" value="45" />
+			<s:Label text="delta" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider id="satSlider" width="300" minimum="0" maximum="1" value="0.2" stepSize="0.01" />
+			<s:Label text="saturation" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider width="300" minimum="0" maximum="360" value="320" />
+			<s:Label text="lorem ipsum" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider width="300" />
+			<s:Label text="lorem ipsum" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider width="300" />
+			<s:Label text="lorem ipsum" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider width="300" />
+			<s:Label text="lorem ipsum" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:HSlider width="300" />
+			<s:Label text="lorem ipsum" />
+		</s:HGroup>
+
+	</s:VGroup>
+</s:WindowedApplication>

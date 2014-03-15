@@ -18,7 +18,7 @@ package com.alfo.chroma
 		
 		public var  m_smoothing:Number;
 		
-		private var dataBytes:ByteArray;
+		private var dataBytes:Vector.<uint>;
 		private var destDataBytes:ByteArray;
 		
 		public function Chromagic()
@@ -191,9 +191,10 @@ package com.alfo.chroma
 			var currentPixel:uint;
 			var keyedBmp:BitmapData=new BitmapData(m_video_input.width,m_video_input.height,true,0xAABBCCDD);
 			destDataBytes=new ByteArray();
-			dataBytes=m_video_input.getPixels(new Rectangle(0,0,m_video_input.width,m_video_input.height));
-			dataBytes.position=0;
-			destDataBytes.position=0;
+			//dataBytes=m_video_input.getPixels(new Rectangle(0,0,m_video_input.width,m_video_input.height));
+			dataBytes=m_video_input.getVector(new Rectangle(0,0,m_video_input.width,m_video_input.height));
+			//dataBytes.position=0;
+			//destDataBytes.position=0;
 			
 			var rgb : Vector.<Number> = new <Number>[0, 0, 0, 0];
 			var hsv : Vector.<Number> = new <Number>[0, 0, 0, 0];
@@ -215,22 +216,26 @@ package com.alfo.chroma
 			h2 += 0.1 * smoothing;
 			trace("key start");
 			var startTime:uint = getTimer();
-			for(var y:uint = 0; y < m_video_input.height; y++)
+			for(var picPos:uint = 0; picPos <dataBytes.length; picPos++)
 			{
 				//bits = m_video_input.scanLine(y);
 				
-				for(var x:uint = 0; x < m_video_input.width; x++)
-				{
+
 					//currentPixel=
 					//currentPixel=m_video_input.getPixel32(x,y);
-					rgb[3]=dataBytes.readUnsignedByte() /255.0;
-					rgb[0]=dataBytes.readUnsignedByte() /255.0;
-					rgb[1]=dataBytes.readUnsignedByte() /255.0;
-					rgb[2]=dataBytes.readUnsignedByte() /255.0;
+					//rgb[3]=dataBytes.readUnsignedByte() /255.0;
+					//rgb[0]=dataBytes.readUnsignedByte() /255.0;
+					//rgb[1]=dataBytes.readUnsignedByte() /255.0;
+					//rgb[2]=dataBytes.readUnsignedByte() /255.0;
 					//rgb[2] = (currentPixel & 0xFF) / 255.0;
 					//rgb[1] = (currentPixel  >> 8 & 0xFF) / 255.0;
 					//rgb[0] = (currentPixel >> 16 & 0xFF) / 255.0;
 					//rgb[3] = (currentPixel >> 24 & 0xFF) / 255.0;
+					
+					rgb[2] = (dataBytes[picPos] & 0xFF) / 255.0;
+					rgb[1] = (dataBytes[picPos] >> 8 & 0xFF) / 255.0;
+					rgb[0] = (dataBytes[picPos] >> 16 & 0xFF) / 255.0;
+					rgb[3] = (dataBytes[picPos] >> 24 & 0xFF) / 255.0;
 					
 					hsv=RGB_to_HSV(rgb);
 					
@@ -255,15 +260,13 @@ package com.alfo.chroma
 							rgb=HSV_to_RGB(hsv);
 						}
 					}
-					currentPixel = (rgb[3] * 255.0) << 24 | (rgb[0] * 255.0) << 16 | (rgb[1] * 255.0) << 8 | (rgb[2] * 255.0);
-					keyedBmp.setPixel32(x,y,currentPixel);
+					dataBytes[picPos] = (rgb[3] * 255.0) << 24 | (rgb[0] * 255.0) << 16 | (rgb[1] * 255.0) << 8 | (rgb[2] * 255.0);
+					//keyedBmp.setPixel32(x,y,currentPixel);
 					//destDataBytes.writeByte(int(rgb[3] * 255.0) << 24);
 					//destDataBytes.writeByte(int(rgb[0] * 255.0) << 16);
 					//destDataBytes.writeByte(int(rgb[1] * 255.0) << 8);
 					//destDataBytes.writeByte(int(rgb[2] * 255.0));
-				}
-				
-				//trace("new line"+y);
+
 			}
 			//try {
 				//destDataBytes.position=0;
@@ -271,6 +274,7 @@ package com.alfo.chroma
 			//} catch (e:Error) {
 			//	trace("error in setpixels");
 			//}
+			keyedBmp.setVector(new Rectangle(0,0,m_video_input.width,m_video_input.height),dataBytes);
 			var endTime:uint = getTimer();
 			
 			trace("key done in : " + (endTime-startTime)/1000);

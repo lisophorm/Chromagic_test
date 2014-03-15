@@ -253,7 +253,7 @@ package com.alfo.chroma
 			
 			var endTime:uint = getTimer();
 			
-			trace("key done in : " + (endTime-startTime));
+			trace("key done in : " + (endTime-startTime)/1000);
 
 			/*var left_spill:Number = m_left_spill;
 			int right_spill = m_right_spill;

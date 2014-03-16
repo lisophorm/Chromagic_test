@@ -8,11 +8,10 @@
 .metadata
 bin/
 bin-debug/
-bin-debug/
 tmp/
 *.tmp
 *.bak
-*.swp
+*.swf
 *.png
 *.swf
 *~.nib

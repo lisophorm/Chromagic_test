@@ -5,6 +5,8 @@ package com.alfo.chroma
 	import flash.utils.ByteArray;
 	import flash.utils.getTimer;
 	
+	import mx.core.UIComponent;
+	
 	public class Chromagic
 	{
 		public var  Hue:Number;
@@ -13,11 +15,15 @@ package com.alfo.chroma
 		public var  MinValue:Number;
 		public var  MaxValue:Number;
 		
+		public static var colorInHSV:Vector.<Number> = new <Number>[0, 0, 0, 0];
+		public static var hsvinRGB:Vector.<Number> = new <Number>[0, 0, 0, 0];
+		
+		public static var blancVec:Vector.<Number> = new <Number>[0, 0, 0, 0];
 
 		private var dataBytes:Vector.<uint>;
 		private var destDataBytes:ByteArray;
 		
-		private var picPos:uint = 0;
+		private var picPos:int = 0;
 		
 		public function Chromagic()
 		{
@@ -33,150 +39,146 @@ package com.alfo.chroma
 		}
 		public function HSV_to_RGB(hsv : Vector.<Number> ):Vector.<Number>
 		{
-			var color : Vector.<Number> = new <Number>[0, 0, 0, 0];
-			var rgb : Vector.<Number> = new <Number>[0, 0, 0, 0];
+			Chromagic.colorInHSV=blancVec;
+			//var color : Vector.<Number> = new <Number>[0, 0, 0, 0];
 			//float color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 			var f:Number,p:Number,q:Number,t:Number;
-			var h:Number,s:Number,v:Number;
+
 			var r:Number=0,g:Number=0,b:Number=0;
-			var i:Number;
+			var i:uint;
 			
 			if(hsv[1] == 0)
 			{
 				if(hsv[2] != 0)
 				{
-					color[0] = color[1] = color[2] = color[3] = hsv[2];
+					Chromagic.colorInHSV[0] = Chromagic.colorInHSV[1] = Chromagic.colorInHSV[2] = Chromagic.colorInHSV[3] = hsv[2];
 				}
 			}
 			else
 			{
-				h =	hsv[0] * 360.0;
-				s =	hsv[1];
-				v =	hsv[2];
+				hsv[0] *= 360;
+
 				
-				if (h == 360.0)
+				if (hsv[0] == 360.0)
 				{
-					h=0;
+					hsv[0]=0;
 				}
 				
-				h /= 60.0;
+				hsv[0] /= 60;
 				
 				// original
 				
-				i=Math.floor(h); //(float)((int)h);
+				i=Math.floor(hsv[0]); //(float)((int)h);
 				
-				f =	h - i;
+				f =	hsv[0] - i;
 				
-				p =	v *	(1.0 - s); 
-				q =	v *	(1.0 - (s *	f));
-				t =	v *	(1.0 - (s *	(1.0 -f)));
+				p =	hsv[2] *	(1 - hsv[1]); 
+				q =	hsv[2] *	(1 - (hsv[1] *	f));
+				t =	hsv[2] *	(1 - (hsv[1] *	(1 -f)));
 				if(i < 0.01)
 				{
-					r =	v;
-					g =	t;
-					b =	p;
+					Chromagic.colorInHSV[0] =	hsv[2];
+					Chromagic.colorInHSV[1] =	t;
+					Chromagic.colorInHSV[2] =	p;
 				}
 				else if(i < 1.01)
 				{
-					r =	q;
-					g =	v;
-					b =	p;
+					Chromagic.colorInHSV[0] =	q;
+					Chromagic.colorInHSV[1] =	hsv[2];
+					Chromagic.colorInHSV[2] =	p;
 				}
 				else if(i < 2.01)
 				{
-					r =	p;
-					g =	v;
-					b =	t;
+					Chromagic.colorInHSV[0] =	p;
+					Chromagic.colorInHSV[1] =	hsv[2];
+					Chromagic.colorInHSV[2] =	t;
 				}
 				else if(i < 3.01)
 				{
-					r =	p;
-					g =	q;
-					b =	v;
+					Chromagic.colorInHSV[0] =	p;
+					Chromagic.colorInHSV[1] =	q;
+					Chromagic.colorInHSV[2] =	hsv[2];
 				}
 				else if(i < 4.01)
 				{
-					r =	t;
-					g =	p;
-					b =	v;
+					Chromagic.colorInHSV[0] =	t;
+					Chromagic.colorInHSV[1] =	p;
+					Chromagic.colorInHSV[2] =	hsv[2];
 				}
 				else if(i < 5.01)
 				{
-					r =	v;
-					g =	p;
-					b =	q;
+					Chromagic.colorInHSV[0] =	hsv[2];
+					Chromagic.colorInHSV[1] =	p;
+					Chromagic.colorInHSV[2] =	q;
 				}
 				
-				color[0]	= r;
-				color[1]	= g;
-				color[2]	= b;
+				
 			} 
-			color[3] = hsv[3];
+			Chromagic.colorInHSV[3] = hsv[3];
 			
-			rgb[0] = color[0];
-			rgb[1] = color[1];
-			rgb[2] = color[2];
-			rgb[3] = color[3];
+			//rgb[0] = Chromagic.colorInHSV[0];
+			//rgb[1] = Chromagic.colorInHSV[1];
+			//rgb[2] = Chromagic.colorInHSV[2];
+			//rgb[3] = Chromagic.colorInHSV[3];
 			
-			return rgb;
+			return Chromagic.colorInHSV;
 		} 
 		
 		public function RGB_to_HSV(color:Vector.<Number>):Vector.<Number>
 		{
-			var hsv : Vector.<Number> = new <Number>[0, 0, 0, 0];
-			var r:Number, g:Number, b:Number, delta:Number;
+			//var hsv : Vector.<Number> = new <Number>[0, 0, 0, 0];
+			var delta:Number;
 			var colorMax:Number, colorMin:Number;
-			var h:Number = 0;
 			var s:Number = 0;
 			var v:Number = 0;
-			r = color[0];
-			g = color[1];
-			b = color[2];
+
 			
 			//trace("r:"+r.toString()+"g:"+g.toString()+"b:"+b.toString());
 			
-			colorMax = Math.max(r,g);
-			colorMax = Math.max(colorMax,b);
-			colorMin = Math.min(r,g);
-			colorMin = Math.min(colorMin,b);
-			v = colorMax;
+			colorMax = Math.max(color[0],color[1]);
+			colorMax = Math.max(colorMax,color[2]);
+			colorMin = Math.min(color[0],color[1]);
+			colorMin = Math.min(colorMin,color[2]);
+			
+			//hsv values
+			Chromagic.hsvinRGB[2] = colorMax;
 			
 			if(colorMax != 0)
 			{
-				s = (colorMax - colorMin) / colorMax;
+				Chromagic.hsvinRGB[1] = (colorMax - colorMin) / colorMax;
 			}
-			if(s != 0) // if not achromatic
+			if(Chromagic.hsvinRGB[1] != 0) // if not achromatic
 			{
 				//trace("not achromatic");
 				delta = colorMax - colorMin;
-				if (r == colorMax)
+				if (color[0] == colorMax)
 				{
-					h = (g-b)/delta;
+					Chromagic.hsvinRGB[0] = (color[1]-color[2])/delta;
 				}
-				else if (g == colorMax)
+				else if (color[1] == colorMax)
 				{
-					h = 2.0 + (b-r) / delta;
+					Chromagic.hsvinRGB[0] = 2.0 + (color[2]-color[0]) / delta;
 				}
 				else // b is max
 				{
-					h = 4.0 + (r-g)/delta;
+					Chromagic.hsvinRGB[0] = 4.0 + (color[0]-color[1])/delta;
 				}
-				h *= 60;
+				Chromagic.hsvinRGB[0] *= 60;
 				
-				if( h < 0)
+				if( Chromagic.hsvinRGB[0] < 0)
 				{
-					h +=360;
+					Chromagic.hsvinRGB[0] +=360;
 				}
 				
 			} 
 			
-			hsv[0] = h / 360.0; // moving h to be between 0 and 1.
-			hsv[1] = s;
-			hsv[2] = v;
-			hsv[3] = color[3];
+			Chromagic.hsvinRGB[0] = Chromagic.hsvinRGB[0] / 360.0; // moving h to be between 0 and 1.
+
+
+			Chromagic.hsvinRGB[3] = color[3];
 			//trace("h:"+hsv[0].toString()+"s:"+hsv[1].toString()+"v:"+hsv[2].toString()+"a:"+hsv[3].toString());
 			//var color:uint = a << 24 | r << 16 | g << 8 | b;
-			return hsv;
+			return Chromagic.hsvinRGB;
 		}
 		
 		
@@ -210,7 +212,8 @@ package com.alfo.chroma
 
 			trace("key start");
 			var startTime:uint = getTimer();
-			for(picPos = 0; picPos <dataBytes.length; picPos++)
+			var lengo:uint=dataBytes.length;
+			for(picPos = 0; picPos <lengo; picPos++)
 			{
 				
 				rgb[2] = (dataBytes[picPos] & 0xFF) / 255.0;

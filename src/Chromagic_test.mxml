@@ -23,6 +23,12 @@
 			
 			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 			{
+				var a:uint=1;
+				b
+				var b:Number=0.1;
+				b=b<<2;
+				trace("uint b"+b);
+				
 				fileRef = new FileReference(); 
 				fileRef.addEventListener(Event.SELECT, onFileSelected); 
 				fileRef.addEventListener(Event.CANCEL, onCancel); 
@@ -55,6 +61,9 @@
 				var desto:Vector.<Number>=chroma.HSV_to_RGB(col);
 				trace("rgb:"+desto[0].toString(16)+"-"+desto[1].toString(16)+"-"+desto[2].toString(16)+"-"+desto[3].toString(16));
 				hueSlider.value=col[0]*360;
+				trace("hue recalc:"+col[0].toString()+":"+(col[0]*360));
+				hueSlider.value=col[0]*360;
+				trace("hue recalc:"+col[0].toString()+":"+(col[0]*360));
 				satSlider.value=(col[1]*100)/2;
 				chroma.Hue=hueSlider.value;
 				chroma.Saturation=satSlider.value/100;

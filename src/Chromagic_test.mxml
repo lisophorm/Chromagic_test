@@ -54,7 +54,7 @@
 				trace("hsv:"+col[0].toString()+"-"+col[1].toString()+"-"+col[2].toString()+"-"+col[3].toString());
 				var desto:Vector.<Number>=chroma.HSV_to_RGB(col);
 				trace("rgb:"+desto[0].toString(16)+"-"+desto[1].toString(16)+"-"+desto[2].toString(16)+"-"+desto[3].toString(16));
-				hueSlider.value=col[0]*360;
+				hueSlider.value=col[0];
 				satSlider.value=(col[1]*100)/2;
 				chroma.Hue=hueSlider.value;
 				chroma.Saturation=satSlider.value/100;

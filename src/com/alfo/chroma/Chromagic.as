@@ -7,17 +7,13 @@ package com.alfo.chroma
 	
 	public class Chromagic
 	{
-		public var  m_hue:Number;
-		public var  m_delta_hue:Number;
-		public var  m_min_saturation:Number;
-		public var  m_left_spill:Number;
-		public var  m_right_spill:Number;
+		public var  Hue:Number;
+		public var  Tolerance:Number;
+		public var  Saturation:Number;
+		public var  MinValue:Number;
+		public var  MaxValue:Number;
 		
-		public var  m_min_value:Number;
-		public var  m_max_value:Number;
-		
-		public var  m_smoothing:Number;
-		
+
 		private var dataBytes:Vector.<uint>;
 		private var destDataBytes:ByteArray;
 		
@@ -25,14 +21,11 @@ package com.alfo.chroma
 		
 		public function Chromagic()
 		{
-			m_hue = 120.0;
-			m_delta_hue = 30.0;
-			m_min_saturation = 0.2;
-			m_left_spill = m_right_spill = 2.0;
-			m_smoothing = 0;
-			
-			m_min_value = 0.35;
-			m_max_value = 0.95;
+			this.Hue = 120;
+			this.Tolerance = 45;
+			this.Saturation = 0.2;
+			this.MinValue = 0.35;
+			this.MaxValue = 0.95;
 		}
 		
 		public function chroma(width:Number,height:Number,rgba:BitmapData):void {
@@ -205,21 +198,16 @@ package com.alfo.chroma
 			var rgb : Vector.<Number> = new <Number>[0, 0, 0, 0];
 			var hsv : Vector.<Number> = new <Number>[0, 0, 0, 0];
 			
-			var h1:Number = m_hue - m_delta_hue / 2.0;
-			var h2:Number = m_hue + m_delta_hue / 2.0;
+			var numArray : Vector.<Number> = new <Number>[0, 0, 0, 0];
 			
-			var smoothing:Number = 1.0 - m_smoothing;
+			var num1:Number = this.Hue - this.Tolerance;
+			var num2:Number = this.Hue + this.Tolerance;
+			var num3:Number = this.Tolerance / 360;
+			var num4:Number = num1 / 360;
+			var num5:Number = num2 / 360;
+			var sat:Number = this.Saturation;
 			
-			var hue_tolerance:Number = m_delta_hue / 2.0;
-			hue_tolerance /= 360.0;
-			
-			h1 /= 360.0;
-			h2 /= 360.0;
-			
-			var s:Number = m_min_saturation;
-			
-			h1 -= 0.1 * smoothing;
-			h2 += 0.1 * smoothing;
+
 			trace("key start");
 			var startTime:uint = getTimer();
 			for(picPos = 0; picPos <dataBytes.length; picPos++)
@@ -232,28 +220,39 @@ package com.alfo.chroma
 				
 				hsv=RGB_to_HSV(rgb);
 				
-				if(hsv[0] > h1 && hsv[0] < h2)
+				if(hsv[0] > num4 && hsv[0] < num5)
 				{
-					if(hsv[1] > s && hsv[2] > 0.4 && hsv[2] < 0.95) 
+					if ( hsv[1] >=  sat)
 					{
-						hsv[3] = 0.0;
-						hsv[1] = 0.0;
-						
-						rgb=HSV_to_RGB(hsv);
-					} else if(hsv[1] > s && hsv[2] > 0.2) {
-						hsv[3] = (1 - hsv[1]) / 0.9;
-						
+						if ( hsv[2] >=  this.MinValue &&  hsv[2] <=  this.MaxValue)
+						{
+							hsv[3] = 0.0;
+							hsv[1] = 0.0;
+							rgb=HSV_to_RGB(hsv);
+						}
+						else if ( hsv[2] < this.MinValue)
+						{
+							hsv[3] = Math.min(1, ( this.MinValue + 1.0 -  hsv[2] /  this.MinValue));
+							hsv[1] = 0.0;
+							hsv[2] = 0.0;
+							rgb=HSV_to_RGB(hsv);
+						}
+						else if ( hsv[2] > this.MaxValue)
+						{
+							hsv[3] = Math.min(1,((hsv[2] -  this.MaxValue) / (1.0 - this.MaxValue)));
+							hsv[1] = 0.0;
+							hsv[2] = 1;
+							rgb=HSV_to_RGB(hsv);
+						}
+					} else
+					{
+						hsv[3] = 1;
 						hsv[1] = 0.0;
 						rgb=HSV_to_RGB(hsv);
 					}
-					else
-					{
-						hsv[3] = 1.0;
-						hsv[1] = 0.0;
-						rgb=HSV_to_RGB(hsv);
-					}
+					dataBytes[picPos] = (rgb[3] * 255.0) << 24 | (rgb[0] * 255.0) << 16 | (rgb[1] * 255.0) << 8 | (rgb[2] * 255.0);
 				}
-				dataBytes[picPos] = (rgb[3] * 255.0) << 24 | (rgb[0] * 255.0) << 16 | (rgb[1] * 255.0) << 8 | (rgb[2] * 255.0);
+				
 
 				
 			}
@@ -266,51 +265,7 @@ package com.alfo.chroma
 			
 			var endTime:uint = getTimer();
 			trace("key done in : " + (endTime-startTime)/1000);
-			if(useSpill) {
-				startTime=getTimer();
-				var left_spill:Number = m_left_spill;
-				var right_spill:Number = m_right_spill;
-				
-				picPos = 0;
-				var offset:uint;
-				var offsetR:uint;
-				var offsetL:uint;
-				for(var y:uint = 1; y < imgHeight - 1; y++)
-				{
-					//bits = m_video_input.scanLine(y);
-					picPos+=imgWidth;
-					
-					for( var x:uint= 0; x < imgWidth - right_spill; x++)
-					{
-						offset=x+picPos;
-						offsetR=x+picPos+right_spill;
-						try {
-							var rightAlpha:uint = Math.min(dataBytes[offset], dataBytes[offsetR]);
-							dataBytes[offset]=(dataBytes[offset] & 0x00FFFFFFFF) | (rightAlpha & 0xFF000000);
-						} catch(e:Error) {
-							trace("error in right spill:"+e.message);
-							break;
-						}
-					}
-					var destX:uint=(imgWidth - (left_spill as uint) - 1);
-					trace("start left spill loop at:"+destX);
-					for(x = destX; x >= 0; x--)
-					{
-						offset=+picPos;
-						offsetL=x+picPos - left_spill;
-						try {
-							var leftAlpha:uint = Math.min(dataBytes[x+picPos], dataBytes[offsetL]);
-							dataBytes[offset]=(dataBytes[offset] & 0x00FFFFFFFF) | (leftAlpha & 0xFF000000);
-						} catch(e:Error) {
-							trace("error in left spill x:"+x+"picPos:"+picPos+" offstL:"+offsetL+" error:"+e.message);
-							break;
-						}
-					}
-				}
-				
-				endTime = getTimer();
-				trace("spill done in : " + (endTime-startTime)/1000);
-			}
+
 			keyedBmp.setVector(new Rectangle(0,0,m_video_input.width,m_video_input.height),dataBytes);
 			return keyedBmp;
 		}

@@ -19,8 +19,18 @@
 			var bits:ByteArray = new ByteArray();
 			var destBits:ByteArray;
 			
+			private var fileRef:FileReference; 
+			
 			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 			{
+				fileRef = new FileReference(); 
+				fileRef.addEventListener(Event.SELECT, onFileSelected); 
+				fileRef.addEventListener(Event.CANCEL, onCancel); 
+				fileRef.addEventListener(IOErrorEvent.IO_ERROR, onIOError); 
+				fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, 
+					onSecurityError); 
+				
+				
 				var startTime:Number = getTimer();
 				chroma=new Chromagic();
 				var i:Number=5;
@@ -45,7 +55,9 @@
 				var desto:Vector.<Number>=chroma.HSV_to_RGB(col);
 				trace("rgb:"+desto[0].toString(16)+"-"+desto[1].toString(16)+"-"+desto[2].toString(16)+"-"+desto[3].toString(16));
 				hueSlider.value=col[0]*360;
-				chroma.m_hue=hueSlider.value;
+				satSlider.value=(col[1]*100)/2;
+				chroma.Hue=hueSlider.value;
+				chroma.Saturation=satSlider.value/100;
 				
 			}
 			
@@ -57,13 +69,13 @@
 			
 			protected function hueSlider_clickHandler(event:MouseEvent):void
 			{
-				chroma.m_hue=hueSlider.value;
+				chroma.Hue=hueSlider.value;
 				
 			}
 			
 			protected function deltaSlider_clickHandler(event:MouseEvent):void
 			{
-				chroma.m_delta_hue=deltaSlider.value;
+				chroma.Tolerance=deltaSlider.value;
 				
 			}
 			
@@ -84,25 +96,64 @@
 			
 			protected function satSlider_clickHandler(event:MouseEvent):void
 			{
-				chroma.m_min_saturation=satSlider.value;
+				chroma.Saturation=satSlider.value/100;
 				
 			}
 			
-			protected function hslider1_clickHandler(event:MouseEvent):void
-			{
-				chroma.m_smoothing=smoothSlider.value;
-				
-			}
+
 			
 			protected function minSlider_clickHandler(event:MouseEvent):void
 			{
-				chroma.m_min_value=minSlider.value;
+				chroma.MinValue=minSlider.value/100;
 				
 			}
 			
 			protected function maxSlider_clickHandler(event:MouseEvent):void
 			{
-				chroma.m_max_value=maxSlider.value;
+				chroma.MaxValue=maxSlider.value/100;
+				
+			}
+			public function onFileSelected(evt:Event):void 
+			{ 
+				fileRef.addEventListener(ProgressEvent.PROGRESS, onProgress); 
+				fileRef.addEventListener(Event.COMPLETE, onComplete); 
+				fileRef.load(); 
+			} 
+			
+			public function onProgress(evt:ProgressEvent):void 
+			{ 
+				trace("Loaded " + evt.bytesLoaded + " of " + evt.bytesTotal + " bytes."); 
+			} 
+			
+			public function onComplete(evt:Event):void 
+			{ 
+				trace("File was successfully loaded."); 
+				//trace(fileRef.data); 
+				var loaderInfo:LoaderInfo = (evt.target as LoaderInfo);
+				imo.source=evt.currentTarget.data;
+				
+				//loaderInfo.removeEventListener(Event.COMPLETE, loadBytesHandler);
+			} 
+			
+			public function onCancel(evt:Event):void 
+			{ 
+				trace("The browse request was canceled by the user."); 
+			} 
+			
+			public function onIOError(evt:IOErrorEvent):void 
+			{ 
+				trace("There was an IO Error."); 
+			} 
+			public function onSecurityError(evt:Event):void 
+			{ 
+				trace("There was a security error."); 
+			} 
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				var textTypeFilter:FileFilter = new FileFilter("Text Files (*.jpg, *.png)", 
+					"*.png;*.jpg"); 
+				fileRef.browse([textTypeFilter])
 				
 			}
 			
@@ -114,13 +165,14 @@
 		
 	<s:HGroup>
 		<s:Spacer height="50" />
-		<s:Image complete="imo_completeHandler(event)" id="imo" click="image1_clickHandler(event)" source="pictures/green.png" />
-		<s:BitmapImage id="dest" width="{imo.width}" height="{imo.height}" />
+		<s:Image width="640" height="480" scaleMode="zoom" complete="imo_completeHandler(event)" id="imo" click="image1_clickHandler(event)" source="pictures/green.png" />
+		<s:BitmapImage width="640" height="480" scaleMode="zoom" id="dest"  />
 	</s:HGroup>
 		
 			
 			<s:HGroup>
 				<s:Button label="Chromami" click="button1_clickHandler(event)" />
+				<s:Button label="carica" click="button2_clickHandler(event)" />
 				<s:Label id="renderTime" width="200" text="gino" />
 				<s:CheckBox id="useSpill" label="spill suppression" selected="true" >
 				</s:CheckBox>
@@ -131,23 +183,19 @@
 		</s:HGroup>
 		<s:HGroup>
 			<s:HSlider id="deltaSlider" click="deltaSlider_clickHandler(event)" width="300" minimum="0" maximum="360" value="45" />
-			<s:Label text="delta" />
+			<s:Label text="tolerance" />
 		</s:HGroup>
 		<s:HGroup>
-			<s:HSlider id="satSlider" click="satSlider_clickHandler(event)" width="300" minimum="0" maximum="1" value="0.2" stepSize="0.01" />
+			<s:HSlider id="satSlider" click="satSlider_clickHandler(event)" width="300" minimum="0" maximum="100" value="20" stepSize="1" />
 			<s:Label text="saturation" />
-		</s:HGroup>
-		<s:HGroup>
-			<s:HSlider width="300" id="smoothSlider" minimum="0" maximum="1" click="hslider1_clickHandler(event)" value="0.2" stepSize="0.01" />
-			<s:Label text="Smoothing" />
 		</s:HGroup>
 
 		<s:HGroup>
-			<s:HSlider width="300" id="minSlider" minimum="0" maximum="1" click="minSlider_clickHandler(event)" value="0.35" stepSize="0.01" />
+			<s:HSlider width="300" id="minSlider" minimum="0" maximum="100" click="minSlider_clickHandler(event)" value="35" stepSize="1" />
 			<s:Label text="minumum" />
 		</s:HGroup>
 		<s:HGroup>
-			<s:HSlider width="300" id="maxSlider" minimum="0" maximum="1" click="maxSlider_clickHandler(event)" value="0.95" stepSize="0.01" />
+			<s:HSlider width="300" id="maxSlider" minimum="0" maximum="100" click="maxSlider_clickHandler(event)" value="95" stepSize="1" />
 			<s:Label text="maximum" />
 		</s:HGroup>
 		<s:HGroup>

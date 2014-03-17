@@ -1,13 +1,17 @@
 package com.alfo.chroma
 {
 	import flash.display.BitmapData;
+	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 	import flash.utils.getTimer;
 	
-	import mx.core.UIComponent;
+//	import avm2.intrinsics.memory.lf64;
+//	import avm2.intrinsics.memory.sf64;
 	
-	public class Chromagic
+	
+	public class Chromagic extends EventDispatcher
 	{
 		public var  Hue:Number;
 		public var  Tolerance:Number;
@@ -21,9 +25,9 @@ package com.alfo.chroma
 		public static var blancVec:Vector.<Number> = new <Number>[0, 0, 0, 0];
 
 		private var dataBytes:Vector.<uint>;
-		private var destDataBytes:ByteArray;
+		public var destDataBytes:ByteArray=new ByteArray();
 		
-		private var picPos:int = 0;
+		public var picPos:int = 0;
 		
 		public function Chromagic()
 		{
@@ -191,7 +195,9 @@ package com.alfo.chroma
 			var imgHeight:uint=m_video_input.height;
 			var imgWidth:uint=m_video_input.width;
 			var keyedBmp:BitmapData=new BitmapData(m_video_input.width,m_video_input.height,true,0xAABBCCDD);
-			destDataBytes=new ByteArray();
+			//destDataBytes
+			destDataBytes.endian=Endian.LITTLE_ENDIAN;
+			destDataBytes=m_video_input.getPixels(new Rectangle(0,0,m_video_input.width,m_video_input.height));
 			//dataBytes=m_video_input.getPixels(new Rectangle(0,0,m_video_input.width,m_video_input.height));
 			dataBytes=m_video_input.getVector(new Rectangle(0,0,m_video_input.width,m_video_input.height));
 			//dataBytes.position=0;
@@ -212,14 +218,28 @@ package com.alfo.chroma
 
 			trace("key start");
 			var startTime:uint = getTimer();
-			var lengo:uint=dataBytes.length;
+			var lengo:uint=destDataBytes.length/4;
+			var rgbString:String;
+			destDataBytes.position=0;
+			var currenPixel:uint;
 			for(picPos = 0; picPos <lengo; picPos++)
 			{
+				currenPixel=destDataBytes.readUnsignedInt();
+//				trace("byte in hex: "+currenPixel.toString(16)+" position:"+picPos+" length:"+lengo);
+				rgb[2] = (currenPixel & 0xFF) / 255.0;
+				rgb[1] = (currenPixel >> 8 & 0xFF) / 255.0;
+				rgb[0] = (currenPixel >> 16 & 0xFF) / 255.0;
+				rgb[3] = (currenPixel >> 24 & 0xFF) / 255.0; 
 				
-				rgb[2] = (dataBytes[picPos] & 0xFF) / 255.0;
-				rgb[1] = (dataBytes[picPos] >> 8 & 0xFF) / 255.0;
-				rgb[0] = (dataBytes[picPos] >> 16 & 0xFF) / 255.0;
-				rgb[3] = (dataBytes[picPos] >> 24 & 0xFF) / 255.0;
+
+				
+				/*rgbString=rgb[0].toString(16);
+				rgbString+=rgb[1].toString(16);
+				rgbString+=rgb[2].toString(16);
+				rgbString+=rgb[3].toString(16);*/
+				
+				
+				
 				
 				hsv=RGB_to_HSV(rgb);
 				

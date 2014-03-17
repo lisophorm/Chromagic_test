@@ -39,6 +39,8 @@
 				
 				var startTime:Number = getTimer();
 				chroma=new Chromagic();
+				
+				chroma.destDataBytes
 				var i:Number=5;
 				var result:Number=i>>8;
 				trace("bitwise << 8 ="+result);
@@ -93,7 +95,7 @@
 				var startTime:Number = getTimer();
 
 				
-				
+				ApplicationDomain.currentDomain.domainMemory=chroma.destDataBytes;
 				var gino:BitmapData;
 				gino=chroma.key(imo.bitmapData,useSpill.selected);
 				trace("key done in : " + (endTime-startTime)/1000);

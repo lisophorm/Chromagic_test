@@ -60,8 +60,6 @@
 				trace("x:"+imo.mouseX);
 				trace("y:"+imo.mouseY);
 				trace("hsv:"+col[0].toString()+"-"+col[1].toString()+"-"+col[2].toString()+"-"+col[3].toString());
-				var desto:Vector.<Number>=chroma.HSV_to_RGB(col);
-				trace("rgb:"+desto[0].toString(16)+"-"+desto[1].toString(16)+"-"+desto[2].toString(16)+"-"+desto[3].toString(16));
 				hueSlider.value=col[0]*360;
 				trace("hue recalc:"+col[0].toString()+":"+(col[0]*360));
 				hueSlider.value=col[0]*360;
@@ -69,6 +67,9 @@
 				satSlider.value=(col[1]*100)/2;
 				chroma.Hue=hueSlider.value;
 				chroma.Saturation=satSlider.value/100;
+				var desto:Vector.<Number>=chroma.HSV_to_RGB(col);
+				trace("rgb:"+desto[0].toString(16)+"-"+desto[1].toString(16)+"-"+desto[2].toString(16)+"-"+desto[3].toString(16));
+
 				
 			}
 			
@@ -95,7 +96,7 @@
 				var startTime:Number = getTimer();
 
 				
-				ApplicationDomain.currentDomain.domainMemory=chroma.destDataBytes;
+				//ApplicationDomain.currentDomain.domainMemory=chroma.destDataBytes;
 				var gino:BitmapData;
 				gino=chroma.key(imo.bitmapData,useSpill.selected);
 				trace("key done in : " + (endTime-startTime)/1000);

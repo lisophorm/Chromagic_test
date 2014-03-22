@@ -6,6 +6,7 @@ package com.alfo.chroma
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	import flash.utils.getTimer;
+	import avm2.intrinsics.memory.*;
 	
 //	import avm2.intrinsics.memory.lf64;
 //	import avm2.intrinsics.memory.sf64;
@@ -31,6 +32,7 @@ package com.alfo.chroma
 		
 		public function Chromagic()
 		{
+			//li32(4444);
 			this.Hue = 120;
 			this.Tolerance = 45;
 			this.Saturation = 0.2;
@@ -41,7 +43,7 @@ package com.alfo.chroma
 		public function chroma(width:Number,height:Number,rgba:BitmapData):void {
 			//process(width, height, rgba);	
 		}
-		public function HSV_to_RGB(hsv : Vector.<Number> ):Vector.<Number>
+		public var HSV_to_RGB = function(hsv : Vector.<Number> ):Vector.<Number>
 		{
 			Chromagic.colorInHSV=blancVec;
 			//var color : Vector.<Number> = new <Number>[0, 0, 0, 0];
@@ -128,7 +130,7 @@ package com.alfo.chroma
 			return Chromagic.colorInHSV;
 		} 
 		
-		public function RGB_to_HSV(color:Vector.<Number>):Vector.<Number>
+		public var RGB_to_HSV = function(color:Vector.<Number>):Vector.<Number>
 		{
 			//var hsv : Vector.<Number> = new <Number>[0, 0, 0, 0];
 			var delta:Number;
@@ -138,11 +140,19 @@ package com.alfo.chroma
 
 			
 			//trace("r:"+r.toString()+"g:"+g.toString()+"b:"+b.toString());
+			// max: c = a > b ? a : b;
+			// min: c = a < b ? a : b;
 			
+			/* original code 
 			colorMax = Math.max(color[0],color[1]);
 			colorMax = Math.max(colorMax,color[2]);
 			colorMin = Math.min(color[0],color[1]);
 			colorMin = Math.min(colorMin,color[2]);
+			*/
+			colorMax = color[0]>color[1]?color[0]:color[1];
+			colorMax = colorMax>color[2]?colorMax:color[2];
+			colorMin = color[0]<color[1]?color[0]:color[1];
+			colorMin = colorMin<color[2]?colorMin:color[2];
 			
 			//hsv values
 			Chromagic.hsvinRGB[2] = colorMax;

@@ -19,7 +19,9 @@
     </application>
   </applications>
   <modules/>
-  <workers/>
+  <workers managerFilePath="src/Workers.as">
+    <worker embed="true" path="src/com/alfo/chroma/chromaElf.as"/>
+  </workers>
   <buildCSSFiles/>
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>

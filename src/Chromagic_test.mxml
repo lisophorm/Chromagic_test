@@ -24,7 +24,9 @@
 			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
 			{
 				var a:uint=1;
-				b
+				if(Worker.isSupported) {
+					trace("worker supported!");
+				}
 				var b:Number=0.1;
 				b=b<<2;
 				trace("uint b"+b);

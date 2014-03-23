@@ -69,8 +69,8 @@ package com.alfo.chroma
 				{
 					hsv[0]=0;
 				}
-				
-				hsv[0] /= 60;
+				// hsv[0] /=60;
+				hsv[0] *= 0.0027777;
 				
 				// original
 				
@@ -164,18 +164,19 @@ package com.alfo.chroma
 			if(Chromagic.hsvinRGB[1] != 0) // if not achromatic
 			{
 				//trace("not achromatic");
-				delta = colorMax - colorMin;
+				// replace div with multi ex 255/4= 255*(1/4)
+				delta = 1/(colorMax - colorMin);
 				if (color[0] == colorMax)
 				{
-					Chromagic.hsvinRGB[0] = (color[1]-color[2])/delta;
+					Chromagic.hsvinRGB[0] = (color[1]-color[2])*delta;
 				}
 				else if (color[1] == colorMax)
 				{
-					Chromagic.hsvinRGB[0] = 2.0 + (color[2]-color[0]) / delta;
+					Chromagic.hsvinRGB[0] = 2.0 + (color[2]-color[0])  * delta;
 				}
 				else // b is max
 				{
-					Chromagic.hsvinRGB[0] = 4.0 + (color[0]-color[1])/delta;
+					Chromagic.hsvinRGB[0] = 4.0 + (color[0]-color[1]) * delta;
 				}
 				Chromagic.hsvinRGB[0] *= 60;
 				
@@ -185,8 +186,8 @@ package com.alfo.chroma
 				}
 				
 			} 
-			
-			Chromagic.hsvinRGB[0] = Chromagic.hsvinRGB[0] / 360.0; // moving h to be between 0 and 1.
+			//0.0027777777777778 = 1/360
+			Chromagic.hsvinRGB[0] = Chromagic.hsvinRGB[0] * 0.0027777; // moving h to be between 0 and 1.
 
 
 			Chromagic.hsvinRGB[3] = color[3];
@@ -236,10 +237,13 @@ package com.alfo.chroma
 			{
 				currenPixel=destDataBytes.readUnsignedInt();
 //				trace("byte in hex: "+currenPixel.toString(16)+" position:"+picPos+" length:"+lengo);
-				rgb[2] = (currenPixel & 0xFF) / 255.0;
-				rgb[1] = (currenPixel >> 8 & 0xFF) / 255.0;
-				rgb[0] = (currenPixel >> 16 & 0xFF) / 255.0;
-				rgb[3] = (currenPixel >> 24 & 0xFF) / 255.0; 
+				
+				// 1/255 = * 0.0027777 
+				
+				rgb[2] = (currenPixel & 0xFF) * 0.0027777 ;
+				rgb[1] = (currenPixel >> 8 & 0xFF) * 0.0027777 ;
+				rgb[0] = (currenPixel >> 16 & 0xFF) * 0.0027777 ;
+				rgb[3] = (currenPixel >> 24 & 0xFF) * 0.0027777 ; 
 				
 
 				
